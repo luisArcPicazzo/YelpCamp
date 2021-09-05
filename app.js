@@ -32,7 +32,36 @@ const path = require('path');
 const campground = require('./models/campground');
 app.set('views', path.join(__dirname, '/views'));
 
+app.use(express.urlencoded({ extended: true })); // middleware -> allow to parse http POST requests
+
 //#endregion
+
+
+/**
+ * Remember to follow REST (Representational State Transfer) 
+ * for CRUD (Create, Read, Update, Delete) 
+ * Consistent URL pattern matched with different HTTP verbs to expose full CRUD ops...
+ 
+* RESTfull PATTERN in conjunction with HTTP Verbs: 
+ * GET /<nameOfEndpoint>    -> get info on that "end-point"
+ * POST /<nameOfEndpoint>   -> on that "end-point"
+ * PATCH /<nameOfEndpoint>  -> updating something about that "end-point"
+ * PUT /<nameOfEndpoint>    -> replace somethinga about that "end-point"
+ * DELETE /<nameOfEndpoint> -> delete something about that "end-Point"
+ * 
+ * _______________________________________________________________________________________
+ * |  N A M E  |        P A T H       |  V E R B  |             P U R P O S E            |
+ * | ----------|----------------------|-----------|--------------------------------------|
+ * |  Index    |  /comments           |    GET    |  Display all comments                |
+ * |  New      |  /comments/new       |    GET    |  Form to create new comment          |
+ * |  Create   |  /comments           |    POST   |  Creates new comment on server       |
+ * |  Show     |  /comments/:id       |    GET    |  Details for one specific comment    |
+ * |  Edit     |  /comments/:id/edit  |    GET    |  Form to edit specific comment       |
+ * |  Update   |  /comments/:id       |   PATCH   |  Updates specific comment on server  |
+ * |  Destroy  |  /comments/:id       |  DELETE   |  Deletes specific item on server     |
+ * ---------------------------------------------------------------------------------------
+ * 
+ */
 
 app.get('/', (req, res) => {
     res.render('home'); // .render to respond with files. instead of strings. IT RENDERS A VIEW.
@@ -49,6 +78,17 @@ app.get('/newcampground', async (req, res)=> {
 app.get('/campgrounds', async (req, res) => {
     const allCampgrounds = await Campground.find({});
     res.render ('campgrounds/index', { allCampgrounds });
+});
+
+app.get('/campgrounds/new', async (req, res) =>{
+    res.render('campgrounds/new');
+});
+
+// remember to set middleware (especially for POST reqs) to tell express to parse the body
+app.post('/campgrounds', async (req, res) => {
+    const newlyCreatedCampground = new Campground(req.body.newCampground); // creates new model containing what was entered by the user in the http form.
+    await newlyCreatedCampground.save();
+    res.redirect(`campgrounds/${newlyCreatedCampground._id}`); // redirects you to the new campground by passing the newCamp's id to the url
 });
 
 app.get('/campgrounds/:id', async (req, res) => {
