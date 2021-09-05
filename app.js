@@ -29,6 +29,7 @@ app.set('view engine', 'ejs'); // express behind the scenes requires ejs... so t
  * then app.set('views', path.join(__dirname, '/views'));
 */
 const path = require('path');
+const campground = require('./models/campground');
 app.set('views', path.join(__dirname, '/views'));
 
 //#endregion
@@ -45,13 +46,10 @@ app.get('/newcampground', async (req, res)=> {
     res.send(camp); // displays the database info...
 })
 
-// N E X T --> S E E D  DB
-
-
-
-
-
-
+app.get('/campgrounds', async (req, res) => {
+    const allCampgrounds = await Campground.find({});
+    res.render ('campgrounds/index', { allCampgrounds });
+});
 
 app.listen(3000, () => {
     console.log('serving from port 3000');
