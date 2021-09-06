@@ -6,6 +6,8 @@ of the current html, into the boilerplate's body so you can now program to only 
 <body>
     <h1><%= campGrndById.title %> </h1>
     <h2><%= campGrndById.location %> </h2>
+    <img src="<%=campGrndById.image%>" alt="">
+    <p><%=campGrndById.description%></p>
     <p>
         <a href="/campgrounds/<%=campGrndById._id%>/edit">Edit Campground</a>
     </p>
