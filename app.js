@@ -2,6 +2,7 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
+const methodOverride = require('method-override'); // to send other than POST and GET http verbs
 const app = express();
 const Campground = require('./models/campground');
 
@@ -33,6 +34,7 @@ const campground = require('./models/campground');
 app.set('views', path.join(__dirname, '/views'));
 
 app.use(express.urlencoded({ extended: true })); // middleware -> allow to parse http POST requests
+app.use(methodOverride('_method')); // _method has to be passed to the .ejs file where you'll write the query string; E.g: ?_method=PUT
 
 //#endregion
 
@@ -94,6 +96,17 @@ app.post('/campgrounds', async (req, res) => {
 app.get('/campgrounds/:id', async (req, res) => {
     const campGrndById = await Campground.findById(req.params.id);
     res.render('campgrounds/show', { campGrndById });
+});
+
+app.get('/campgrounds/:id/edit', async(req, res) => {
+    const campGrndById = await Campground.findById(req.params.id);
+    res.render('campgrounds/edit', { campGrndById });
+});
+
+app.put('/campgrounds/:id', async (req, res) => {
+    const { id } = req.params;
+    const updatedData = await Campground.findByIdAndUpdate(id, { ...req.body.newCampground }); // spread title and location into id object??? check spread operator
+    res.redirect(`/campgrounds/${updatedData._id}`);
 });
 
 app.listen(3000, () => {
