@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHOW CAMPGROUNDS</title>
-</head>
+<!-- By calling/including the boiler plate's directory, you can now inject the body 
+of the current html, into the boilerplate's body so you can now program to only one layout -->
+<% layout('layouts/boilerplate') %>  <!-- include the boilerplates' directory so I can inject this body... -->
+<!--Can now include my layouts, stylesheets, my javascript and have a common layout -->
+
 <body>
     <h1><%= campGrndById.title %> </h1>
     <h2><%= campGrndById.location %> </h2>
@@ -22,4 +19,3 @@
         <p></p>
     </footer>
 </body>
-</html>

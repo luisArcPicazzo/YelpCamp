@@ -1,10 +1,11 @@
-//#region  D E F A U L T   S E T T I N G S
+//#region  D E F A U L T   S E T T I N G S --- I N C L U D E S
 
 const express = require('express');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override'); // to send other than POST and GET http verbs
-const app = express();
 const Campground = require('./models/campground');
+const ejsMate = require('ejs-mate'); // one of many engines used to make sense of ejs... to add boilerplates..
+const app = express();
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
     useNewUrlParser: true, useUnifiedTopology: true // does not support useCreateIndex: true anymore...
@@ -31,10 +32,13 @@ app.set('view engine', 'ejs'); // express behind the scenes requires ejs... so t
 */
 const path = require('path');
 const campground = require('./models/campground');
+
 app.set('views', path.join(__dirname, '/views'));
 
 app.use(express.urlencoded({ extended: true })); // middleware -> allow to parse http POST requests
 app.use(methodOverride('_method')); // _method has to be passed to the .ejs file where you'll write the query string; E.g: ?_method=PUT
+
+app.engine('ejs', ejsMate);
 
 //#endregion
 
