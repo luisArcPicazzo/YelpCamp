@@ -44,7 +44,7 @@ app.use(methodOverride('_method')); // _method has to be passed to the .ejs file
  * for CRUD (Create, Read, Update, Delete) 
  * Consistent URL pattern matched with different HTTP verbs to expose full CRUD ops...
  
-* RESTfull PATTERN in conjunction with HTTP Verbs: 
+ * RESTfull PATTERN in conjunction with HTTP Verbs: 
  * GET /<nameOfEndpoint>    -> get info on that "end-point"
  * POST /<nameOfEndpoint>   -> on that "end-point"
  * PATCH /<nameOfEndpoint>  -> updating something about that "end-point"
@@ -63,7 +63,7 @@ app.use(methodOverride('_method')); // _method has to be passed to the .ejs file
  * |  Destroy  |  /comments/:id       |  DELETE   |  Deletes specific item on server     |
  * ---------------------------------------------------------------------------------------
  * 
- */
+*/
 
 app.get('/', (req, res) => {
     res.render('home'); // .render to respond with files. instead of strings. IT RENDERS A VIEW.
@@ -107,6 +107,12 @@ app.put('/campgrounds/:id', async (req, res) => {
     const { id } = req.params;
     const updatedData = await Campground.findByIdAndUpdate(id, { ...req.body.newCampground }); // spread title and location into id object??? check spread operator
     res.redirect(`/campgrounds/${updatedData._id}`);
+});
+
+app.delete('/campgrounds/:id', async (req, res) => {
+    const { id } = req.params;
+    const deleteData = await Campground.findByIdAndDelete(id);
+    res.redirect('/campgrounds');
 });
 
 app.listen(3000, () => {
