@@ -18,11 +18,25 @@ of the current html, into the boilerplate's body so you can now program to only 
 <body>
     <h1>All CAMPGROUNDS</h1>
     <a href="/campgrounds/new">Add a New Campground!</a>
-    <ul>
         <% for (let campGrnd of allCampgrounds) {%> 
-            <li><a href="/campgrounds/<%= campGrnd._id%>"><%= campGrnd.title %></a></li>
-            <% } %> 
-    </ul>
+            <div class="card" mb-3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <img src="<%=campGrnd.image%>" alt="" class="img-fluid">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title"><%=campGrnd.title%></h5>
+                            <p class="card-text"><%=campGrnd.description%> </p>
+                            <p class="card-text">
+                                <small class="text-muted"><%=campGrnd.location%></small>
+                            </p>
+                            <a class="btn btn-primary" href="/campgrounds/<%-campGrnd._id%>">View <%=campGrnd.title%> </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %> 
 </body>
 
 <!--</html>-->
