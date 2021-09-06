@@ -3,21 +3,27 @@ of the current html, into the boilerplate's body so you can now program to only 
 <% layout('layouts/boilerplate') %>  <!-- include the boilerplates' directory so I can inject this body... -->
 <!--Can now include my layouts, stylesheets, my javascript and have a common layout -->
 
-<body>
-    <h1><%= campGrndById.title %> </h1>
-    <h2><%= campGrndById.location %> </h2>
-    <img src="<%=campGrndById.image%>" alt="">
-    <p><%=campGrndById.description%></p>
-    <p>
-        <a href="/campgrounds/<%=campGrndById._id%>/edit">Edit Campground</a>
-    </p>
-    <p>
-        <form action="/campgrounds/<%=campGrndById._id%>?_method=DELETE" method="POST">
-            <button>Delete Campground</button>
-        </form>
-    </p>
-    <footer>
-        <a href="/campgrounds">All Campgrounds</a>
-        <p></p>
-    </footer>
-</body>
+<div class="row">
+    <div class="col-6 offset-3">
+        <div class="card mb-3">
+            <img src="<%=campGrndById.image%>" class="card-img-top" alt="">
+            <div class="card-body">
+              <h5 class="card-title"><%=campGrndById.title%></h5>
+              <p class="card-text"><%=campGrndById.description%></p>
+            </div>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item text-muted"><%=campGrndById.location%></li>
+              <li class="list-group-item">$ <%=campGrndById.price%>/night</li>
+            </ul>
+            <div class="card-body">
+              <a href="/campgrounds/<%=campGrndById._id%>/edit" class="card-link btn btn-info">Edit Campground</a>
+                <form class="d-inline" action="/campgrounds/<%=campGrndById._id%>?_method=DELETE" method="POST">
+                    <button class="btn btn-danger">Delete Campground</button>
+                </form>
+            </div>
+            <div class="card-footer text-muted">
+                2 days ago
+            </div>
+          </div>
+    </div>
+</div>
