@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const methodOverride = require('method-override'); // to send other than POST and GET http verbs
 const Campground = require('./models/campground');
 const ejsMate = require('ejs-mate'); // one of many engines used to make sense of ejs... to add boilerplates..
+const catchAsync = require('./utils/CatchAsync');
+const expressError = require('./utils/ExpressError');
 const app = express();
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
@@ -32,6 +34,7 @@ app.set('view engine', 'ejs'); // express behind the scenes requires ejs... so t
 */
 const path = require('path');
 const campground = require('./models/campground');
+const ExpressError = require('./utils/ExpressError');
 
 app.set('views', path.join(__dirname, '/views'));
 
@@ -73,50 +76,62 @@ app.get('/', (req, res) => {
     res.render('home'); // .render to respond with files. instead of strings. IT RENDERS A VIEW.
 });
 
-app.get('/newcampground', async (req, res)=> {
-    const camp = new Campground({
-                    title: 'my backyard',
-                    description: 'cheap camping' });
-    await camp.save();
-    res.send(camp); // displays the database info...
-})
+//app.get('/newcampground', async (req, res)=> {
+//    const camp = new Campground({
+//                    title: 'my backyard',
+//                    description: 'cheap camping' });
+//    await camp.save();
+//    res.send(camp); // displays the database info...
+//})
 
-app.get('/campgrounds', async (req, res) => {
+app.get('/campgrounds', catchAsync(async (req, res) => {
     const allCampgrounds = await Campground.find({});
     res.render ('campgrounds/index', { allCampgrounds });
-});
+}));
 
 app.get('/campgrounds/new', async (req, res) =>{
     res.render('campgrounds/new');
 });
 
 // remember to set middleware (especially for POST reqs) to tell express to parse the body
-app.post('/campgrounds', async (req, res) => {
-    const newlyCreatedCampground = new Campground(req.body.newCampground); // creates new model containing what was entered by the user in the http form.
-    await newlyCreatedCampground.save();
-    res.redirect(`campgrounds/${newlyCreatedCampground._id}`); // redirects you to the new campground by passing the newCamp's id to the url
-});
+app.post('/campgrounds', catchAsync(async (req, res, next) => { // catchAsync --> is the wrapper function created with CatchAsync.js which aids by catching errors without the need for try/catch blocks.
+        if(!req.body.newlyCreatedCampground) throw new ExpressError('Invalid Campground Data', 400); // catched with help of the wrapper function
+        const newlyCreatedCampground = new Campground(req.body.newCampground); // creates new model containing what was entered by the user in the http form.
+        await newlyCreatedCampground.save();
+        res.redirect(`campgrounds/${newlyCreatedCampground._id}`); // redirects you to the new campground by passing the newCamp's id to the url
+}));
 
-app.get('/campgrounds/:id', async (req, res) => {
+app.get('/campgrounds/:id', catchAsync(async (req, res) => {
     const campGrndById = await Campground.findById(req.params.id);
     res.render('campgrounds/show', { campGrndById });
-});
+}));
 
-app.get('/campgrounds/:id/edit', async(req, res) => {
+app.get('/campgrounds/:id/edit', catchAsync(async(req, res) => {
     const campGrndById = await Campground.findById(req.params.id);
     res.render('campgrounds/edit', { campGrndById });
-});
+}));
 
-app.put('/campgrounds/:id', async (req, res) => {
+app.put('/campgrounds/:id', catchAsync(async (req, res) => {
     const { id } = req.params;
     const updatedData = await Campground.findByIdAndUpdate(id, { ...req.body.newCampground }); // spread title and location into id object??? check spread operator
     res.redirect(`/campgrounds/${updatedData._id}`);
-});
+}));
 
-app.delete('/campgrounds/:id', async (req, res) => {
+app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
     const { id } = req.params;
     const deleteData = await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds');
+}));
+
+app.all('*', (req, res, next)=> {   // all -> for every single request.. * -> for every single path 
+    //res.send('404!!!!');  // order matters. Only runs if no route is matched first.
+    next(new ExpressError('Page Not Found :(', 404)); // Uses the ExpressError class defined in utils/ExpressError.js
+                                                      // Then passes through app.use (below) via next()
+});
+
+app.use((err, req, res, next) => {
+    const { statusCode = 500, message = 'Something went wrong' } = err; // destructure..
+    res.status(statusCode).send(message);
 });
 
 app.listen(3000, () => {

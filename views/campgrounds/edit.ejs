@@ -7,7 +7,7 @@ of the current html, into the boilerplate's body so you can now program to only 
 <div class="row">
     <h1 class="text-center">Edit Campground</h1>
     <div class="col-6 offset-3">
-        <form action="/campgrounds/<%=campGrndById._id%>?_method=PUT" method="POST">
+        <form action="/campgrounds/<%=campGrndById._id%>?_method=PUT" method="POST" novalidate class="validated-form">
             <div class="mb-3">
                 <label class="form-label" for="title">Title</label>
                 <!-- ABOUT campground[title] -> 
@@ -15,27 +15,32 @@ of the current html, into the boilerplate's body so you can now program to only 
                         so if I have multiple << campground[something] >> when our data is sent 
                         via POST request to the server, everything in the request.body will be 
                         stored under "campground" so we do this to group our content together -->
-                <input class="form-control" type="text" id="title" name="newCampground[title]"  value="<%=campGrndById.title%>">
+                <input class="form-control" type="text" id="title" name="newCampground[title]"  value="<%=campGrndById.title%>" required>
+                <div class="valid-feedback">Looks good!</div>
             </div>
             <div class="mb-3">
                 <label class="form-label" for="title">Location</label>
-                <input class="form-control" type="text" id="location" name="newCampground[location]" value="<%=campGrndById.location%>">
+                <input class="form-control" type="text" id="location" name="newCampground[location]" value="<%=campGrndById.location%>" required>
+                <div class="valid-feedback">Looks good!</div>
             </div>
             <div class="mb-3">
                 <label class="form-label" for="image">Image Url</label>
-                <input type="text" class="form-control" id="image" name="newCampground[image]" value="<%=campGrndById.image%> ">
+                <input type="text" class="form-control" id="image" name="newCampground[image]" value="<%=campGrndById.image%> " required>
+                <div class="valid-feedback">Looks good!</div>
             </div>
             <div class="mb-3">
                 <labe class="form-label" for="price">Price</labe>
                 <div class="input-group">
                     <span class="input-group-text" id="price-label">$</span>
                     <input type="text" class="form-control" id="price" placeholder="0.00" aria-label="price" 
-                    aria-describedby="price-label" name="newCampground[price]" value="<%=campGrndById.price%>">
+                    aria-describedby="price-label" name="newCampground[price]" value="<%=campGrndById.price%>" required>
+                    <div class="valid-feedback">Looks good!</div>
                   </div>
             </div>
             <div class="mb-3">
                 <label class="form-label" for="description">Description</label>
-                <textarea class="form-control" type="text" id="location" name="newCampground[description]"><%=campGrndById.description%> </textarea>
+                <textarea class="form-control" type="text" id="location" name="newCampground[description]" required><%=campGrndById.description%> </textarea>
+                <div class="valid-feedback">Looks good!</div>
             </div>
             <div class="mb-3">
                 <button class="btn btn-info">Update Campground</button>
