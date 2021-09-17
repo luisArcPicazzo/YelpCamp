@@ -6,6 +6,7 @@ const methodOverride = require('method-override'); // to send other than POST an
 const Campground = require('./models/campground');
 const ejsMate = require('ejs-mate'); // one of many engines used to make sense of ejs... to add boilerplates..
 const catchAsync = require('./utils/CatchAsync');
+const { joiCampgroundSchema } = require('./joiValidationSchemas');
 const expressError = require('./utils/ExpressError');
 const app = express();
 
@@ -35,6 +36,7 @@ app.set('view engine', 'ejs'); // express behind the scenes requires ejs... so t
 const path = require('path');
 const campground = require('./models/campground');
 const ExpressError = require('./utils/ExpressError');
+const Joi = require('joi');
 
 app.set('views', path.join(__dirname, '/views'));
 
@@ -50,7 +52,7 @@ app.engine('ejs', ejsMate);
  * Remember to follow REST (Representational State Transfer) 
  * for CRUD (Create, Read, Update, Delete) 
  * Consistent URL pattern matched with different HTTP verbs to expose full CRUD ops...
- 
+ * 
  * RESTfull PATTERN in conjunction with HTTP Verbs: 
  * GET /<nameOfEndpoint>    -> get info on that "end-point"
  * POST /<nameOfEndpoint>   -> on that "end-point"
@@ -70,7 +72,26 @@ app.engine('ejs', ejsMate);
  * |  Destroy  |  /comments/:id       |  DELETE   |  Deletes specific item on server     |
  * ---------------------------------------------------------------------------------------
  * 
-*/
+ */
+
+// Temporary middleware section:
+const joiValidateInput = (req, res, next) => {
+    const { error } = joiCampgroundSchema.validate(req.body);
+    if(error) {
+        /**
+         * If error is found. then map over the "error.details" array 
+         * in order to make a single string message. Then take that newly created 
+         * string message and pass it to a "new ExpressError" instance and throw it as 
+         * an exception...
+         */
+        const joiValidationError = error.details.map(el => el.message).join(',');
+        throw new ExpressError(joiValidationError, 400);
+    } else {
+        next();
+    }
+}
+
+
 
 app.get('/', (req, res) => {
     res.render('home'); // .render to respond with files. instead of strings. IT RENDERS A VIEW.
@@ -94,11 +115,10 @@ app.get('/campgrounds/new', async (req, res) =>{
 });
 
 // remember to set middleware (especially for POST reqs) to tell express to parse the body
-app.post('/campgrounds', catchAsync(async (req, res, next) => { // catchAsync --> is the wrapper function created with CatchAsync.js which aids by catching errors without the need for try/catch blocks.
-        if(!req.body.newlyCreatedCampground) throw new ExpressError('Invalid Campground Data', 400); // catched with help of the wrapper function
-        const newlyCreatedCampground = new Campground(req.body.newCampground); // creates new model containing what was entered by the user in the http form.
-        await newlyCreatedCampground.save();
-        res.redirect(`campgrounds/${newlyCreatedCampground._id}`); // redirects you to the new campground by passing the newCamp's id to the url
+app.post('/campgrounds', joiValidateInput, catchAsync(async (req, res, next) => { // catchAsync --> is the wrapper function created with CatchAsync.js which aids by catching errors without the need for try/catch blocks.
+    const newlyCreatedCampground = new Campground(req.body.newCampground); // creates new model containing what was entered by the user in the http form.
+    await newlyCreatedCampground.save();
+    res.redirect(`campgrounds/${newlyCreatedCampground._id}`); // redirects you to the new campground by passing the newCamp's id to the url
 }));
 
 app.get('/campgrounds/:id', catchAsync(async (req, res) => {
@@ -111,7 +131,7 @@ app.get('/campgrounds/:id/edit', catchAsync(async(req, res) => {
     res.render('campgrounds/edit', { campGrndById });
 }));
 
-app.put('/campgrounds/:id', catchAsync(async (req, res) => {
+app.put('/campgrounds/:id', joiValidateInput, catchAsync(async (req, res) => {
     const { id } = req.params;
     const updatedData = await Campground.findByIdAndUpdate(id, { ...req.body.newCampground }); // spread title and location into id object??? check spread operator
     res.redirect(`/campgrounds/${updatedData._id}`);
@@ -123,15 +143,20 @@ app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
     res.redirect('/campgrounds');
 }));
 
-app.all('*', (req, res, next)=> {   // all -> for every single request.. * -> for every single path 
-    //res.send('404!!!!');  // order matters. Only runs if no route is matched first.
-    next(new ExpressError('Page Not Found :(', 404)); // Uses the ExpressError class defined in utils/ExpressError.js
-                                                      // Then passes through app.use (below) via next()
+app.all('*', (req, res, next)=> {
+    next(new ExpressError('Page Not Found :(', 404));
+    /**
+     * all -> for every single request.. * -> for every single path 
+     * Uses the ExpressError class defined in utils/ExpressError.js
+     * Then passes through app.use (below) via next()
+     */
 });
 
 app.use((err, req, res, next) => {
-    const { statusCode = 500, message = 'Something went wrong' } = err; // destructure..
-    res.status(statusCode).send(message);
+
+    const { statusCode = 500 } = err; // destructure..
+    if(!err.message) err.message = 'Oh no! Something Went Wrong...';
+    res.status(statusCode).render('error', { err });
 });
 
 app.listen(3000, () => {
