@@ -135,7 +135,7 @@ app.post('/campgrounds', joiValidateInput, catchAsync(async (req, res, next) => 
 }));
 
 app.get('/campgrounds/:id', catchAsync(async (req, res) => {
-    const campGrndById = await Campground.findById(req.params.id);
+    const campGrndById = await Campground.findById(req.params.id).populate('reviews');
     res.render('campgrounds/show', { campGrndById });
 }));
 

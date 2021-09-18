@@ -4,7 +4,7 @@ of the current html, into the boilerplate's body so you can now program to only 
 <!--Can now include my layouts, stylesheets, my javascript and have a common layout -->
 
 <div class="row">
-    <div class="col-6 offset-3">
+    <div class="col-6">
         <div class="card mb-3">
             <img src="<%=campGrndById.image%>" class="card-img-top" alt="">
             <div class="card-body">
@@ -21,21 +21,29 @@ of the current html, into the boilerplate's body so you can now program to only 
                     <button class="btn btn-danger">Delete Campground</button>
                 </form>
             </div>
-            <div class="card-footer text-muted">
-                2 days ago
-            </div>
-          </div>
-          <form action="/campgrounds/<%=campGrndById._id%>/reviews" class="mb-3 validated-form" method="POST" novalidate>
-            <h2>Leave a Review</h2>
-            <div class="mb-3">
-              <label for="rating" class="form-label">Rating</label>
-              <input type="range" class="form-range" min="1" max="5" name="newCampgroundReview[rating]" id="rating">
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="body">Review</label>
-              <textarea class="form-control" name="newCampgroundReview[body]" id="body" cols="30" rows="3" required></textarea>
-            </div>
-            <button class="btn btn-success">Submit Review</button>
-          </form>
+            <div class="card-footer text-muted"> 2 days ago</div>
+        </div>
+    </div>
+    <div class="col-6">
+      <form action="/campgrounds/<%=campGrndById._id%>/reviews" class="mb-3 validated-form" method="POST" novalidate>
+      <h2>Leave a Review</h2>
+      <div class="mb-3">
+        <label for="rating" class="form-label">Rating</label>
+        <input type="range" class="form-range" min="1" max="5" name="newCampgroundReview[rating]" id="rating">
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="body">Review</label>
+        <textarea class="form-control" name="newCampgroundReview[body]" id="body" cols="30" rows="3" required></textarea>
+      </div>
+      <button class="btn btn-success">Submit Review</button>
+    </form>
+    <% for( let review of campGrndById.reviews) { %>
+    <div class="card mb-3">
+      <div class="card-body">
+        <p class="card-title">Rating: <%=review.rating%> </p>
+        <p class="card-text">Review: <%=review.body%></p>
+      </div>
+    </div>
+    <% } %>
     </div>
 </div>
