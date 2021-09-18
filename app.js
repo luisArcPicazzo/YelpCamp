@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override'); // to send other than POST and GET http verbs
 const Campground = require('./models/campground');
+const Review = require('./models/review');
 const ejsMate = require('ejs-mate'); // one of many engines used to make sense of ejs... to add boilerplates..
 const catchAsync = require('./utils/CatchAsync');
 const { joiCampgroundSchema } = require('./joiValidationSchemas');
@@ -37,6 +38,8 @@ const path = require('path');
 const campground = require('./models/campground');
 const ExpressError = require('./utils/ExpressError');
 const Joi = require('joi');
+const CatchAsync = require('./utils/CatchAsync');
+const review = require('./models/review');
 
 app.set('views', path.join(__dirname, '/views'));
 
@@ -142,6 +145,16 @@ app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
     const deleteData = await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds');
 }));
+
+app.post('/campgrounds/:id/reviews', CatchAsync(async(req, res)=>{
+    //res.send('Review Submitted');
+    const campGrndById = await Campground.findById(req.params.id);
+    const campgrndReview = new Review(req.body.newCampgroundReview);
+    campGrndById.reviews.push(campgrndReview);
+    await campgrndReview.save();
+    await campGrndById.save();
+    res.redirect(`/campgrounds/${campGrndById._id}`);
+}))
 
 app.all('*', (req, res, next)=> {
     next(new ExpressError('Page Not Found :(', 404));

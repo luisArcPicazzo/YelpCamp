@@ -13,7 +13,18 @@ const CampgroundSchema = new mongoose.Schema ({
     image: String,
     price: Number,
     description: String,
-    location: String
+    location: String,
+    /**
+     * create an array to store the id's belonging to 
+     * the reviews' schema. Thus we've made feasible a one to many 
+     * relationship between the campground -> review schemas (dbs).
+     */
+    reviews: [
+        {
+            type: mongoose.Schema.Types.ObjectId, // an array of object ids.
+            ref: 'Review' // Defines a reference towards the review's schema.
+        }
+    ]
 });
 
 module.exports = mongoose.model('Campground', CampgroundSchema);
