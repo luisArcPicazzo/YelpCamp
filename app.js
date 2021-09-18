@@ -7,7 +7,7 @@ const Campground = require('./models/campground');
 const Review = require('./models/review');
 const ejsMate = require('ejs-mate'); // one of many engines used to make sense of ejs... to add boilerplates..
 const catchAsync = require('./utils/CatchAsync');
-const { joiCampgroundSchema } = require('./joiValidationSchemas');
+const { joiCampgroundSchema, joiReviewSchema} = require('./joiValidationSchemas');
 const expressError = require('./utils/ExpressError');
 const app = express();
 
@@ -94,6 +94,16 @@ const joiValidateInput = (req, res, next) => {
     }
 }
 
+const joiValidateReview = (req, res, next) => {
+    const { error } = joiReviewSchema.validate(req.body);
+    if(error) {
+        const joiValidationError = error.details.map(el => el.message).join(',');
+        throw new ExpressError(joiValidationError, 400);
+    } else {
+        next();
+    }
+} 
+
 
 
 app.get('/', (req, res) => {
@@ -146,7 +156,7 @@ app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
     res.redirect('/campgrounds');
 }));
 
-app.post('/campgrounds/:id/reviews', CatchAsync(async(req, res)=>{
+app.post('/campgrounds/:id/reviews', joiValidateReview, CatchAsync(async(req, res)=> {
     //res.send('Review Submitted');
     const campGrndById = await Campground.findById(req.params.id);
     const campgrndReview = new Review(req.body.newCampgroundReview);
@@ -154,7 +164,7 @@ app.post('/campgrounds/:id/reviews', CatchAsync(async(req, res)=>{
     await campgrndReview.save();
     await campGrndById.save();
     res.redirect(`/campgrounds/${campGrndById._id}`);
-}))
+}));
 
 app.all('*', (req, res, next)=> {
     next(new ExpressError('Page Not Found :(', 404));

@@ -24,4 +24,13 @@ joi.object({
             description: joi.string().required(),
             location: joi.string().required()
         }).required() // newCampground comes from new.ejs 
-})
+});
+
+module.exports.joiReviewSchema = 
+joi.object({
+    newCampgroundReview:
+        joi.object({
+            rating: joi.number().required().min(0).max(5),
+            body: joi.string().required()
+        }).required() //  newCampgroundReview comes from show.ejs
+});
