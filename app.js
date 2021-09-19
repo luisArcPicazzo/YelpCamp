@@ -75,7 +75,7 @@ app.engine('ejs', ejsMate);
  * |  Destroy  |  /comments/:id       |  DELETE   |  Deletes specific item on server     |
  * ---------------------------------------------------------------------------------------
  * 
- */
+*/
 
 // Temporary middleware section:
 const joiValidateInput = (req, res, next) => {
@@ -157,13 +157,34 @@ app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
 }));
 
 app.post('/campgrounds/:id/reviews', joiValidateReview, CatchAsync(async(req, res)=> {
-    //res.send('Review Submitted');
     const campGrndById = await Campground.findById(req.params.id);
     const campgrndReview = new Review(req.body.newCampgroundReview);
     campGrndById.reviews.push(campgrndReview);
     await campgrndReview.save();
     await campGrndById.save();
     res.redirect(`/campgrounds/${campGrndById._id}`);
+}));
+
+app.delete('/campgrounds/:id/reviews/:reviewId', catchAsync(async(req, res)=> { // delete the one object ID that corresponds to review
+    /**
+     * ---- $pull -----Mongo Operator-------
+     * The $pull operator REMOVES from an existing array all instances of 
+     * a value or values that match a specified condition.
+     * 
+     * we still have a reference to the review within the array of object id's 
+     * that we have to get rid of from the campground array.
+     *
+     * So you want to find that campgroundId and get rid of that one review ref
+     * from within campground. but nothing more...
+     * so the next operation in line 185 says the following;
+     * 
+     * Go to the campground id, within the reviews array located @ that campground Id, 
+     * REMOVE ($pull) that reviewId reference.
+    */
+    const { id, reviewId } = req.params;
+    await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } } );
+    await Review.findByIdAndDelete(reviewId);
+    res.redirect(`/campgrounds/${id}`);
 }));
 
 app.all('*', (req, res, next)=> {

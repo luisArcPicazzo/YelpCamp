@@ -7,6 +7,7 @@
  */
 
 const mongoose = require('mongoose');
+const review = require('./review');
 
 const CampgroundSchema = new mongoose.Schema ({
     title: String, // shorthand of {type: String}
@@ -25,6 +26,21 @@ const CampgroundSchema = new mongoose.Schema ({
             ref: 'Review' // Defines a reference towards the review's schema.
         }
     ]
+});
+
+/**
+ * ------ Mongoose Middleware --------
+ * Deletes all posted reviews associated with one campground
+ * when said campground has been deleted...
+ * Lecture 469 Section 46 Colt Steele's udemy course
+ * Check again for further reference cause it's tricky
+ */
+CampgroundSchema.post('findOneAndDelete', async function (doc) { // after it's been deleted... run this middleware
+    if (doc) {
+        await review.deleteMany({
+            _id: { $in: doc.reviews } 
+        })
+    }
 });
 
 module.exports = mongoose.model('Campground', CampgroundSchema);

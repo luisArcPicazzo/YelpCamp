@@ -40,8 +40,11 @@ of the current html, into the boilerplate's body so you can now program to only 
     <% for( let review of campGrndById.reviews) { %>
     <div class="card mb-3">
       <div class="card-body">
-        <p class="card-title">Rating: <%=review.rating%> </p>
-        <p class="card-text">Review: <%=review.body%></p>
+        <h5 class="card-title">Rating: <%=review.rating%> </h5>
+        <p class="card-title">Review: <%=review.body%></p>
+        <form action="/campgrounds/<%= campGrndById._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+          <button class="btn btn-sm btn-danger">Delete Post</button>
+        </form>
       </div>
     </div>
     <% } %>
