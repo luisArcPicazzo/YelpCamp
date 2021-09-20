@@ -23,7 +23,6 @@ const joiValidateReview = (req, res, next) => {
     if(error) {
         const joiValidationError = error.details.map(el => el.message).join(',');
         throw new expressError(joiValidationError, 400);
-//        throw new ExpressError(joiValidationError, 400);
     } else {
         next();
     }
@@ -33,11 +32,10 @@ const joiValidateReview = (req, res, next) => {
 router.post('/', joiValidateReview, catchAsync(async(req, res)=> {
     const campGrndById = await campground.findById(req.params.id);
     const campgrndReview = new review(req.body.newCampgroundReview);
-    //const campGrndById = await Campground.findById(req.params.id);
-    //const campgrndReview = new Review(req.body.newCampgroundReview);
     campGrndById.reviews.push(campgrndReview);
     await campgrndReview.save();
     await campGrndById.save();
+    req.flash('flashMsgSuccess', 'Review submitted!'); // make sure you display this info in the template (ejs)
     res.redirect(`/campgrounds/${campGrndById._id}`);
 }));
 
@@ -60,6 +58,7 @@ router.delete('/:reviewId', catchAsync(async(req, res)=> { // delete the one obj
     const { id, reviewId } = req.params;
     await campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } } );
     await review.findByIdAndDelete(reviewId);
+    req.flash('flashMsgSuccess', 'Review successfully deleted!'); // make sure you display this info in the template (ejs)
     res.redirect(`/campgrounds/${id}`);
 }));
 

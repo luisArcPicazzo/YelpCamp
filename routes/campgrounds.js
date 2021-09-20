@@ -41,11 +41,16 @@ router.get('/new', async (req, res) =>{
 router.post('/', joiValidateInput, catchAsync(async (req, res, next) => { // catchAsync --> is the wrapper function created with CatchAsync.js which aids by catching errors without the need for try/catch blocks.
     const newlyCreatedCampground = new Campground(req.body.newCampground); // creates new model containing what was entered by the user in the http form.
     await newlyCreatedCampground.save();
+    req.flash('flashMsgSuccess', 'New campground created!'); // make sure you display this info in the template (ejs)
     res.redirect(`campgrounds/${newlyCreatedCampground._id}`); // redirects you to the new campground by passing the newCamp's id to the url
 }));
 
 router.get('/:id', catchAsync(async (req, res) => {
     const campGrndById = await Campground.findById(req.params.id).populate('reviews');
+    if(!campGrndById) { // if campground not found (got deleted of something...)
+        req.flash('flashMsgError', 'Campground not found!');
+        return res.redirect('/campgrounds');
+    }
     res.render('campgrounds/show', { campGrndById });
 }));
 
@@ -57,12 +62,14 @@ router.get('/:id/edit', catchAsync(async(req, res) => {
 router.put('/:id', joiValidateInput, catchAsync(async (req, res) => {
     const { id } = req.params;
     const updatedData = await Campground.findByIdAndUpdate(id, { ...req.body.newCampground }); // spread title and location into id object??? check spread operator
+    req.flash('flashMsgSuccess', 'Campground successfully updated!'); // make sure you display this info in the template (ejs)
     res.redirect(`/campgrounds/${updatedData._id}`);
 }));
 
 router.delete('/:id', catchAsync(async (req, res) => {
     const { id } = req.params;
     const deleteData = await Campground.findByIdAndDelete(id);
+    req.flash('flashMsgSuccess', 'Campground successfully deleted!'); // make sure you display this info in the template (ejs)
     res.redirect('/campgrounds');
 }));
 

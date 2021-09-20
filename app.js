@@ -6,6 +6,8 @@ const methodOverride = require('method-override'); // to send other than POST an
 const ejsMate = require('ejs-mate'); // one of many engines used to make sense of ejs... to add boilerplates..
 const routesCampgrounds = require('./routes/campgrounds');
 const routesReviews = require('./routes/reviews');
+const session = require('express-session');
+const flash = require('connect-flash');
 const app = express();
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
@@ -34,10 +36,33 @@ app.set('view engine', 'ejs'); // express behind the scenes requires ejs... so t
 const path = require('path');
 const expressError = require('./utils/ExpressError');
 
-app.set('views', path.join(__dirname, '/views'));
+app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.urlencoded({ extended: true })); // middleware -> allow to parse http POST requests
 app.use(methodOverride('_method')); // _method has to be passed to the .ejs file where you'll write the query string; E.g: ?_method=PUT
+app.use(express.static(path.join(__dirname, 'public'))); // serve our static assets whose scripts are located in the "public" directory.
+
+/**
+ * Sets up session (cookies and stuff)
+ */
+const sessionConfig = {
+    secret:           'secret',
+    resave:            false,
+    saveUninitialized: true,
+    /** The above two options are to remove deprecation warnings */
+    cookie: {
+        httpOnly: true, // protects cookie to not be accessed through client-side scripts, and as a result even w/cross side scripting, the browser will not reveal the cookie to the party.
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // ms * sec * mins * hrs * days (ms in a week so it expires in a week)
+        maxAge: 1000 * 60 * 60 * 24 * 7
+        /** 
+         * If no expiration day set, once the user logs in, it will stay logged in forever. 
+         * So no expiration date means less secure. That's why it is recommended to set 
+         * an expiration date.
+         */
+    }
+}
+app.use(session(sessionConfig)); // After setting up session we can now use "connect-flash"
+app.use(flash()); // Should be able to flash something by calling request.flash(key, value)
 
 app.engine('ejs', ejsMate);
 
@@ -70,6 +95,23 @@ app.engine('ejs', ejsMate);
  * 
 */
 
+// TEMPORARY MIDDLEWARE SECTION:
+    // Flash Middleware
+app.use((req, res, next) => {
+    res.locals.flashMsgSuccess = req.flash('flashMsgSuccess');
+    res.locals.flashMsgError = req.flash('flashMsgError');
+
+    /** 
+     * whatever res.locals.success contains, we'll have access 
+     * to it automatically in our template so we don't have to pass 
+     * it through... 
+     * That is; on every single request () we take whatever's in the 
+     * flash under 'success' and have access to it in our locals (res.locals) 
+     * under the key success (.success)
+    */
+
+    next(); // don't forget to call next(); !!!
+});
 
 app.use('/campgrounds', routesCampgrounds); // prefixed with "/campgrounds"
 
