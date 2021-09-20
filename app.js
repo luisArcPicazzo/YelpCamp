@@ -3,12 +3,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override'); // to send other than POST and GET http verbs
-const Campground = require('./models/campground');
-const Review = require('./models/review');
 const ejsMate = require('ejs-mate'); // one of many engines used to make sense of ejs... to add boilerplates..
-const catchAsync = require('./utils/CatchAsync');
-const { joiCampgroundSchema, joiReviewSchema} = require('./joiValidationSchemas');
-const expressError = require('./utils/ExpressError');
+const routesCampgrounds = require('./routes/campgrounds');
+const routesReviews = require('./routes/reviews');
 const app = express();
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
@@ -35,11 +32,7 @@ app.set('view engine', 'ejs'); // express behind the scenes requires ejs... so t
  * then app.set('views', path.join(__dirname, '/views'));
 */
 const path = require('path');
-const campground = require('./models/campground');
-const ExpressError = require('./utils/ExpressError');
-const Joi = require('joi');
-const CatchAsync = require('./utils/CatchAsync');
-const review = require('./models/review');
+const expressError = require('./utils/ExpressError');
 
 app.set('views', path.join(__dirname, '/views'));
 
@@ -77,118 +70,13 @@ app.engine('ejs', ejsMate);
  * 
 */
 
-// Temporary middleware section:
-const joiValidateInput = (req, res, next) => {
-    const { error } = joiCampgroundSchema.validate(req.body);
-    if(error) {
-        /**
-         * If error is found. then map over the "error.details" array 
-         * in order to make a single string message. Then take that newly created 
-         * string message and pass it to a "new ExpressError" instance and throw it as 
-         * an exception...
-         */
-        const joiValidationError = error.details.map(el => el.message).join(',');
-        throw new ExpressError(joiValidationError, 400);
-    } else {
-        next();
-    }
-}
 
-const joiValidateReview = (req, res, next) => {
-    const { error } = joiReviewSchema.validate(req.body);
-    if(error) {
-        const joiValidationError = error.details.map(el => el.message).join(',');
-        throw new ExpressError(joiValidationError, 400);
-    } else {
-        next();
-    }
-} 
+app.use('/campgrounds', routesCampgrounds); // prefixed with "/campgrounds"
 
-
-
-app.get('/', (req, res) => {
-    res.render('home'); // .render to respond with files. instead of strings. IT RENDERS A VIEW.
-});
-
-//app.get('/newcampground', async (req, res)=> {
-//    const camp = new Campground({
-//                    title: 'my backyard',
-//                    description: 'cheap camping' });
-//    await camp.save();
-//    res.send(camp); // displays the database info...
-//})
-
-app.get('/campgrounds', catchAsync(async (req, res) => {
-    const allCampgrounds = await Campground.find({});
-    res.render ('campgrounds/index', { allCampgrounds });
-}));
-
-app.get('/campgrounds/new', async (req, res) =>{
-    res.render('campgrounds/new');
-});
-
-// remember to set middleware (especially for POST reqs) to tell express to parse the body
-app.post('/campgrounds', joiValidateInput, catchAsync(async (req, res, next) => { // catchAsync --> is the wrapper function created with CatchAsync.js which aids by catching errors without the need for try/catch blocks.
-    const newlyCreatedCampground = new Campground(req.body.newCampground); // creates new model containing what was entered by the user in the http form.
-    await newlyCreatedCampground.save();
-    res.redirect(`campgrounds/${newlyCreatedCampground._id}`); // redirects you to the new campground by passing the newCamp's id to the url
-}));
-
-app.get('/campgrounds/:id', catchAsync(async (req, res) => {
-    const campGrndById = await Campground.findById(req.params.id).populate('reviews');
-    res.render('campgrounds/show', { campGrndById });
-}));
-
-app.get('/campgrounds/:id/edit', catchAsync(async(req, res) => {
-    const campGrndById = await Campground.findById(req.params.id);
-    res.render('campgrounds/edit', { campGrndById });
-}));
-
-app.put('/campgrounds/:id', joiValidateInput, catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const updatedData = await Campground.findByIdAndUpdate(id, { ...req.body.newCampground }); // spread title and location into id object??? check spread operator
-    res.redirect(`/campgrounds/${updatedData._id}`);
-}));
-
-app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const deleteData = await Campground.findByIdAndDelete(id);
-    res.redirect('/campgrounds');
-}));
-
-app.post('/campgrounds/:id/reviews', joiValidateReview, CatchAsync(async(req, res)=> {
-    const campGrndById = await Campground.findById(req.params.id);
-    const campgrndReview = new Review(req.body.newCampgroundReview);
-    campGrndById.reviews.push(campgrndReview);
-    await campgrndReview.save();
-    await campGrndById.save();
-    res.redirect(`/campgrounds/${campGrndById._id}`);
-}));
-
-app.delete('/campgrounds/:id/reviews/:reviewId', catchAsync(async(req, res)=> { // delete the one object ID that corresponds to review
-    /**
-     * ---- $pull -----Mongo Operator-------
-     * The $pull operator REMOVES from an existing array all instances of 
-     * a value or values that match a specified condition.
-     * 
-     * we still have a reference to the review within the array of object id's 
-     * that we have to get rid of from the campground array.
-     *
-     * So you want to find that campgroundId and get rid of that one review ref
-     * from within campground. but nothing more...
-     * so the next operation in line 185 says the following;
-     * 
-     * Go to the campground id, within the reviews array located @ that campground Id, 
-     * REMOVE ($pull) that reviewId reference.
-    */
-    const { id, reviewId } = req.params;
-    await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } } );
-    await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/campgrounds/${id}`);
-}));
+app.use('/campgrounds/:id/reviews', routesReviews);
 
 app.all('*', (req, res, next)=> {
-    next(new ExpressError('Page Not Found :(', 404));
+    next(new expressError('Page Not Found :(', 404));
     /**
      * all -> for every single request.. * -> for every single path 
      * Uses the ExpressError class defined in utils/ExpressError.js
