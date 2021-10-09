@@ -9,6 +9,9 @@ const routesReviews = require('./routes/reviews');
 const session = require('express-session');
 const flash = require('connect-flash');
 const app = express();
+const passport = require('passport');
+const passportLocalStrategy = require('passport-local'); // nothing to do with 'passport-local-mongoose', that belongs to the User model...
+const User = require('./models/user');
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
     useNewUrlParser: true, useUnifiedTopology: true // does not support useCreateIndex: true anymore...
@@ -41,7 +44,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true })); // middleware -> allow to parse http POST requests
 app.use(methodOverride('_method')); // _method has to be passed to the .ejs file where you'll write the query string; E.g: ?_method=PUT
 app.use(express.static(path.join(__dirname, 'public'))); // serve our static assets whose scripts are located in the "public" directory.
-
 /**
  * Sets up session (cookies and stuff)
  */
@@ -63,6 +65,11 @@ const sessionConfig = {
 }
 app.use(session(sessionConfig)); // After setting up session we can now use "connect-flash"
 app.use(flash()); // Should be able to flash something by calling request.flash(key, value)
+app.use(passport.initialize()); 
+app.use(passport.session()); // Use if you need persistent log-in sessions. Make sure you use session (as in app.use(session(sessionConfig));) before passport.session()...
+passport.use(new passportLocalStrategy(User.authenticate())); // method within passportLocalMongoose.
+passport.serializeUser(User.serializeUser());      // how do we store a user in the session
+passport.deserializeUser(User.deserializeUser());  // how do we get the user out of the session un-store them 
 
 app.engine('ejs', ejsMate);
 
