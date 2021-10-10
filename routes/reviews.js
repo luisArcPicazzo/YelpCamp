@@ -15,6 +15,7 @@ const expressError = require('../utils/ExpressError');
 const campground = require('../models/campground');
 const review = require('../models/review');
 const { joiReviewSchema } = require('../joiValidationSchemas');
+const { isLoggedIn } = require('../middleware');
 
 
 // Temporary middleware section:
@@ -29,7 +30,7 @@ const joiValidateReview = (req, res, next) => {
 } 
 
 
-router.post('/', joiValidateReview, catchAsync(async(req, res)=> {
+router.post('/', isLoggedIn, joiValidateReview, catchAsync(async(req, res)=> {
     const campGrndById = await campground.findById(req.params.id);
     const campgrndReview = new review(req.body.newCampgroundReview);
     campGrndById.reviews.push(campgrndReview);
@@ -39,7 +40,7 @@ router.post('/', joiValidateReview, catchAsync(async(req, res)=> {
     res.redirect(`/campgrounds/${campGrndById._id}`);
 }));
 
-router.delete('/:reviewId', catchAsync(async(req, res)=> { // delete the one object ID that corresponds to review
+router.delete('/:reviewId', isLoggedIn, catchAsync(async(req, res)=> { // delete the one object ID that corresponds to review
     /**
      * ---- $pull -----Mongo Operator-------
      * The $pull operator REMOVES from an existing array all instances of 

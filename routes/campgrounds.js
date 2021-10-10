@@ -67,7 +67,7 @@ router.put('/:id', isLoggedIn, joiValidateInput, catchAsync(async (req, res) => 
     res.redirect(`/campgrounds/${updatedData._id}`);
 }));
 
-router.delete('/:id', catchAsync(async (req, res) => {
+router.delete('/:id', isLoggedIn, catchAsync(async (req, res) => {
     const { id } = req.params;
     const deleteData = await Campground.findByIdAndDelete(id);
     req.flash('flashMsgSuccess', 'Campground successfully deleted!'); // make sure you display this info in the template (ejs)

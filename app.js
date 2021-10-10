@@ -107,6 +107,8 @@ app.engine('ejs', ejsMate);
 // TEMPORARY MIDDLEWARE SECTION:
     // Flash Middleware
 app.use((req, res, next) => {
+    console.log(req.session);
+    res.locals.currentSignedInUser = req.user;
     res.locals.flashMsgSuccess = req.flash('flashMsgSuccess');
     res.locals.flashMsgError = req.flash('flashMsgError');
     res.locals.passportAuthError = req.flash('error');
