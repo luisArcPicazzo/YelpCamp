@@ -4,14 +4,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override'); // to send other than POST and GET http verbs
 const ejsMate = require('ejs-mate'); // one of many engines used to make sense of ejs... to add boilerplates..
-const routesCampgrounds = require('./routes/campgrounds');
-const routesReviews = require('./routes/reviews');
 const session = require('express-session');
 const flash = require('connect-flash');
 const app = express();
 const passport = require('passport');
 const passportLocalStrategy = require('passport-local'); // nothing to do with 'passport-local-mongoose', that belongs to the User model...
 const User = require('./models/user');
+
+const routesUsers = require('./routes/users');
+const routesCampgrounds = require('./routes/campgrounds');
+const routesReviews = require('./routes/reviews');
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
     useNewUrlParser: true, useUnifiedTopology: true // does not support useCreateIndex: true anymore...
@@ -120,8 +122,9 @@ app.use((req, res, next) => {
     next(); // don't forget to call next(); !!!
 });
 
-app.use('/campgrounds', routesCampgrounds); // prefixed with "/campgrounds"
 
+app.use('/', routesUsers);
+app.use('/campgrounds', routesCampgrounds); // prefixed with "/campgrounds"
 app.use('/campgrounds/:id/reviews', routesReviews);
 
 app.all('*', (req, res, next)=> {
