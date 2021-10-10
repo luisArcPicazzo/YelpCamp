@@ -1,6 +1,7 @@
 const expressError = require('./utils/ExpressError');
 const { joiCampgroundSchema, joiReviewSchema } = require('./joiValidationSchemas');
 const Campground = require('./models/campground');
+const Review = require('./models/review');
 
 
 module.exports.isLoggedIn = (req, res, next) => {
@@ -47,4 +48,14 @@ module.exports.joiValidateReview = (req, res, next) => {
     } else {
         next();
     }
+}
+
+module.exports.isReviewAuthor = async(req, res, next) => {
+    const { id, reviewId } = req.params;
+    const reviewById = await Review.findById(reviewId);
+    if (!reviewById.author.equals(req.user._id)) {
+        req.flash('flashMsgError', 'You must be the author of this item to do that');
+        return res.redirect(`/campgrounds/${id}`);
+    }
+    next();
 }

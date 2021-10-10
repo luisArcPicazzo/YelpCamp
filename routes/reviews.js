@@ -13,12 +13,13 @@ const router = express.Router({ mergeParams: true });
 const catchAsync = require('../utils/CatchAsync');
 const campground = require('../models/campground');
 const review = require('../models/review');
-const { isLoggedIn, joiValidateReview } = require('../middleware');
+const { isLoggedIn, joiValidateReview, isReviewAuthor } = require('../middleware');
 
 
 router.post('/', isLoggedIn, joiValidateReview, catchAsync(async(req, res)=> {
     const campGrndById = await campground.findById(req.params.id);
     const campgrndReview = new review(req.body.newCampgroundReview);
+    campgrndReview.author = req.user._id; // associate the logged in user as author to the newly created review
     campGrndById.reviews.push(campgrndReview);
     await campgrndReview.save();
     await campGrndById.save();
@@ -26,7 +27,7 @@ router.post('/', isLoggedIn, joiValidateReview, catchAsync(async(req, res)=> {
     res.redirect(`/campgrounds/${campGrndById._id}`);
 }));
 
-router.delete('/:reviewId', isLoggedIn, catchAsync(async(req, res)=> { // delete the one object ID that corresponds to review
+router.delete('/:reviewId', isLoggedIn, isReviewAuthor, catchAsync(async(req, res)=> { // delete the one object ID that corresponds to review
     /**
      * ---- $pull -----Mongo Operator-------
      * The $pull operator REMOVES from an existing array all instances of 

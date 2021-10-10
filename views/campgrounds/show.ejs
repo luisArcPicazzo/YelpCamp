@@ -28,26 +28,31 @@ of the current html, into the boilerplate's body so you can now program to only 
         </div>
     </div>
     <div class="col-6">
+    <% if (currentSignedInUser) { %>
       <form action="/campgrounds/<%=campGrndById._id%>/reviews" class="mb-3 validated-form" method="POST" novalidate>
-      <h2>Leave a Review</h2>
-      <div class="mb-3">
-        <label for="rating" class="form-label">Rating</label>
-        <input type="range" class="form-range" min="1" max="5" name="newCampgroundReview[rating]" id="rating">
-      </div>
-      <div class="mb-3">
-        <label class="form-label" for="body">Review</label>
-        <textarea class="form-control" name="newCampgroundReview[body]" id="body" cols="30" rows="3" required></textarea>
-      </div>
-      <button class="btn btn-success">Submit Review</button>
-    </form>
+        <h2>Leave a Review</h2>
+        <div class="mb-3">
+          <label for="rating" class="form-label">Rating</label>
+          <input type="range" class="form-range" min="1" max="5" name="newCampgroundReview[rating]" id="rating">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="body">Review</label>
+          <textarea class="form-control" name="newCampgroundReview[body]" id="body" cols="30" rows="3" required></textarea>
+        </div>
+        <button class="btn btn-success">Submit Review</button>
+      </form>
+    <% } %>
     <% for( let review of campGrndById.reviews) { %>
     <div class="card mb-3">
       <div class="card-body">
         <h5 class="card-title">Rating: <%=review.rating%> </h5>
+        <h6 class="card-subtitle mb-2 text-muted">Posted by: <%=review.author.username%> </h6>
         <p class="card-title">Review: <%=review.body%></p>
-        <form action="/campgrounds/<%= campGrndById._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
-          <button class="btn btn-sm btn-danger">Delete Post</button>
-        </form>
+        <% if (currentSignedInUser && review.author.equals(currentSignedInUser._id)) { %>
+          <form action="/campgrounds/<%= campGrndById._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+            <button class="btn btn-sm btn-danger">Delete Post</button>
+          </form>
+        <% } %> 
       </div>
     </div>
     <% } %>

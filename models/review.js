@@ -2,7 +2,11 @@ const mongoose = require('mongoose');
 
 const ReviewSchema = new mongoose.Schema({
     body: String,
-    rating: Number
+    rating: Number,
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User' // refers to the user model
+    }
 });
 
 module.exports = mongoose.model('Review', ReviewSchema);
