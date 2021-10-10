@@ -20,6 +20,10 @@ const CampgroundSchema = new mongoose.Schema ({
      * the reviews' schema. Thus we've made feasible a one to many 
      * relationship between the campground -> review schemas (dbs).
      */
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     reviews: [
         {
             type: mongoose.Schema.Types.ObjectId, // an array of object ids.

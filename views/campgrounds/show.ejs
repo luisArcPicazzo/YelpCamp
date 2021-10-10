@@ -13,14 +13,17 @@ of the current html, into the boilerplate's body so you can now program to only 
             </div>
             <ul class="list-group list-group-flush">
               <li class="list-group-item text-muted"><%=campGrndById.location%></li>
+              <li class="list-group-item text">Submitted by: <%=campGrndById.author.username%></li>
               <li class="list-group-item">$ <%=campGrndById.price%>/night</li>
             </ul>
-            <div class="card-body">
-              <a href="/campgrounds/<%=campGrndById._id%>/edit" class="card-link btn btn-info">Edit Campground</a>
-                <form class="d-inline" action="/campgrounds/<%=campGrndById._id%>?_method=DELETE" method="POST">
-                    <button class="btn btn-danger">Delete Campground</button>
-                </form>
-            </div>
+            <% if (currentSignedInUser && campGrndById.author.equals(currentSignedInUser._id)) { %>
+              <div class="card-body">
+                <a href="/campgrounds/<%=campGrndById._id%>/edit" class="card-link btn btn-info">Edit Campground</a>
+                  <form class="d-inline" action="/campgrounds/<%=campGrndById._id%>?_method=DELETE" method="POST">
+                      <button class="btn btn-danger">Delete Campground</button>
+                  </form>
+              </div>             
+            <% } %>
             <div class="card-footer text-muted"> 2 days ago</div>
         </div>
     </div>
