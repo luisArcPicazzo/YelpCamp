@@ -7,9 +7,14 @@
     </div> 
 <% } %>
 
-<% if (flashMsgError && flashMsgError.length) { %>
+<% if ( flashMsgError && flashMsgError.length ) { %>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <%= flashMsgError %> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div> 
-<% } %>
+<% } else if ( passportAuthError && passportAuthError.length ) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <%= passportAuthError %> 
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div> 
+<% } %> 

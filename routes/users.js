@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 const catchAsync = require('../utils/CatchAsync');
 const User = require('../models/user');
 
@@ -21,5 +22,18 @@ router.get('/register', (req, res) => {
         res.redirect('register');
     }
  }));
+
+router.get('/login', (req, res) => {
+    res.render('users/login');
+});
+
+/**
+ * Passport provides the "passport.authenticate(<strategy>, [<flashMsgs, etc...>])" 
+ * middleware which does magic for authentication purposes.
+ */
+router.post('/login', passport.authenticate('local', { failureFlash: true, failureRedirect: '/login'} ), (req, res) => {
+    req.flash('flashMsgSuccess', 'Welcome back!');
+    res.redirect('/campgrounds');
+});
 
 module.exports = router;

@@ -109,6 +109,7 @@ app.engine('ejs', ejsMate);
 app.use((req, res, next) => {
     res.locals.flashMsgSuccess = req.flash('flashMsgSuccess');
     res.locals.flashMsgError = req.flash('flashMsgError');
+    res.locals.passportAuthError = req.flash('error');
 
     /** 
      * whatever res.locals.success contains, we'll have access 
