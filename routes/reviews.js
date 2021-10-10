@@ -1,4 +1,3 @@
-const express = require('express');
 /**
  * When a router is created, params are divided, and cannot access other 
  * params with other files (eg. campground id within of the calling campgrounds.js)
@@ -8,26 +7,13 @@ const express = require('express');
  * reviews.js is dependen on campgound's id path, thus we need to use the parameter here.
  * sin campgrounds.js does note use any id from reviews, campgrounds.js does not need to 
  * pass the optional argument
-*/
+ */
+const express = require('express');
 const router = express.Router({ mergeParams: true }); 
 const catchAsync = require('../utils/CatchAsync');
-const expressError = require('../utils/ExpressError');
 const campground = require('../models/campground');
 const review = require('../models/review');
-const { joiReviewSchema } = require('../joiValidationSchemas');
-const { isLoggedIn } = require('../middleware');
-
-
-// Temporary middleware section:
-const joiValidateReview = (req, res, next) => {
-    const { error } = joiReviewSchema.validate(req.body);
-    if(error) {
-        const joiValidationError = error.details.map(el => el.message).join(',');
-        throw new expressError(joiValidationError, 400);
-    } else {
-        next();
-    }
-} 
+const { isLoggedIn, joiValidateReview } = require('../middleware');
 
 
 router.post('/', isLoggedIn, joiValidateReview, catchAsync(async(req, res)=> {

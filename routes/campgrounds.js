@@ -1,39 +1,9 @@
 const express = require('express');
 const router = express.Router(); // not sure what's this... TODO: check in express docs
 const catchAsync = require('../utils/CatchAsync');
-const expressError = require('../utils/ExpressError');
 const Campground = require('../models/campground');
-const { joiCampgroundSchema } = require('../joiValidationSchemas');
-const { isLoggedIn } = require('../middleware');
+const { isLoggedIn , isAuthor , joiValidateInput} = require('../middleware');
 
-// Temporary middleware section:
-
-const joiValidateInput = (req, res, next) => {
-    const { error } = joiCampgroundSchema.validate(req.body);
-    if(error) {
-        /**
-         * If error is found. then map over the "error.details" array 
-         * in order to make a single string message. Then take that newly created 
-         * string message and pass it to a "new ExpressError" instance and throw it as 
-         * an exception...
-         */
-        const joiValidationError = error.details.map(el => el.message).join(',');
-        throw new expressError(joiValidationError, 400);
-//        throw new ExpressError(joiValidationError, 400);
-    } else {
-        next();
-    }
-}
-
-const isAuthor = async(req, res, next) => {
-    const { id } = req.params;
-    const campgroundById = await Campground.findById(id);
-    if (!campgroundById.author.equals(req.user._id)) {
-        req.flash('flashMsgError', 'You must be the author of this item to do that');
-        return res.redirect(`/campgrounds/${id}`);
-    }
-    next();
-}
 
 //router.get('/', (req, res) => {
 //    res.render('home'); // .render to respond with files. instead of strings. IT RENDERS A VIEW.
