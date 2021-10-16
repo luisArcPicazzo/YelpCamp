@@ -4,6 +4,8 @@ const router = express.Router(); // not sure what's this... TODO: check in expre
 const ctrllrCampgrounds = require('../controllers/campgrounds');
 const catchAsync = require('../utils/CatchAsync');
 const { isLoggedIn , isAuthor , joiValidateInput} = require('../middleware');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 //#endregion
 
 
@@ -15,7 +17,11 @@ const { isLoggedIn , isAuthor , joiValidateInput} = require('../middleware');
 
 router.route('/')
     .get(catchAsync(ctrllrCampgrounds.index))
-    .post(isLoggedIn, joiValidateInput, catchAsync(ctrllrCampgrounds.createCampground));
+    // .post(isLoggedIn, joiValidateInput, catchAsync(ctrllrCampgrounds.createCampground));
+    .post(upload.array('image'), (req, res) => {
+        console.log(req.body, req.files);
+        res.send("Did it work!?");
+    });
     // remember to set middleware (especially for POST reqs) to tell express to parse the body
 
 router.get('/new', isLoggedIn, ctrllrCampgrounds.newCampgroundForm);
