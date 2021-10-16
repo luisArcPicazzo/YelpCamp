@@ -1,5 +1,7 @@
 //#region  D E F A U L T   S E T T I N G S --- I N C L U D E S
-
+if(process.env.NODE_ENV !== "production") {
+    require('dotenv').config();
+}
 const express = require('express');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override'); // to send other than POST and GET http verbs

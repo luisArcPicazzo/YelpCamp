@@ -5,7 +5,8 @@ const ctrllrCampgrounds = require('../controllers/campgrounds');
 const catchAsync = require('../utils/CatchAsync');
 const { isLoggedIn , isAuthor , joiValidateInput} = require('../middleware');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const { storage } = require('../cloudinary'); // no need to requires "index" cause node automaticall looks for an "index.js" file in a folder
+const upload = multer({ storage });
 //#endregion
 
 
