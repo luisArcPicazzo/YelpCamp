@@ -11,7 +11,11 @@ const review = require('./review');
 
 const CampgroundSchema = new mongoose.Schema ({
     title: String, // shorthand of {type: String}
-    image: String,
+    images: [
+        {   url: String,      // stores cloudinary's path
+            filename: String  // stores coudinary's filename
+        }
+    ],
     price: Number,
     description: String,
     location: String,

@@ -6,8 +6,28 @@ of the current html, into the boilerplate's body so you can now program to only 
 
 <div class="row">
     <div class="col-6">
+      
+      <div id="campgroundImageCarousel" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
+            <% campGrndById.images.forEach((img, i) => { %> 
+                <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+                  <img src="<%=img.url%>" class="d-block w-100" alt="">
+                </div>
+            <% }) %> 
+        </div>
+        <% if( campGrndById.images.length > 1 ) {%> 
+            <button class="carousel-control-prev" data-bs-target="#campgroundImageCarousel" role="button" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="sr-only"></span>
+            </button>
+            <button class="carousel-control-next" data-bs-target="#campgroundImageCarousel" role="button" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="sr-only"></span>
+            </button>
+        <% } %> 
+      </div>
+
         <div class="card mb-3">
-            <img src="<%=campGrndById.image%>" class="card-img-top" alt="">
             <div class="card-body">
               <h5 class="card-title"><%=campGrndById.title%></h5>
               <p class="card-text"><%=campGrndById.description%></p>

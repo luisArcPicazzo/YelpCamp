@@ -18,11 +18,11 @@ const upload = multer({ storage });
 
 router.route('/')
     .get(catchAsync(ctrllrCampgrounds.index))
-    // .post(isLoggedIn, joiValidateInput, catchAsync(ctrllrCampgrounds.createCampground));
-    .post(upload.array('image'), (req, res) => {
-        console.log(req.body, req.files);
-        res.send("Did it work!?");
-    });
+    .post(isLoggedIn, upload.array('image'), joiValidateInput, catchAsync(ctrllrCampgrounds.createCampground)); // quick hack for now.. but remember to validate the images with joi. and not bypass them, like now..
+    //.post(upload.array('image'), (req, res) => {
+    //    console.log(req.body, req.files);
+    //    res.send("Did it work!?");
+    //});
     // remember to set middleware (especially for POST reqs) to tell express to parse the body
 
 router.get('/new', isLoggedIn, ctrllrCampgrounds.newCampgroundForm);

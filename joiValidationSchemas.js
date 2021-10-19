@@ -5,7 +5,7 @@ joi.object({
     newCampground: 
         joi.object({
             title: joi.string().required(),
-            image: joi.string().required(),
+            // image: joi.string().required(),  // disabled due to cloudinary tests..
             price: joi.number().required().min(0.0),
             description: joi.string().required(),
             location: joi.string().required()
