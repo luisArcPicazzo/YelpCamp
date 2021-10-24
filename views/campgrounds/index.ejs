@@ -22,7 +22,12 @@ of the current html, into the boilerplate's body so you can now program to only 
             <div class="card" mb-3>
                 <div class="row">
                     <div class="col-md-4">
+                    <%if(campGrnd.images.length) {%>
                         <img src="<%=campGrnd.images[0].url%>" alt="" class="img-fluid">
+                    <% }else {%>
+                        <img class="img-fluid" alt=""
+                            src="https://res.cloudinary.com/douqbebwk/image/upload/v1600103881/YelpCamp/lz8jjv2gyynjil7lswf4.png">
+                    <% } %>
                     </div>
                     <div class="col-md-8">
                         <div class="card-body">

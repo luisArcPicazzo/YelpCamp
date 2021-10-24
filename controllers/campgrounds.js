@@ -49,6 +49,11 @@ module.exports.editCampgroundForm = async(req, res) => {
 module.exports.updateCampground = async (req, res) => {
     const { id } = req.params;
     const updatedData = await Campground.findByIdAndUpdate(id, { ...req.body.newCampground }); // spread title and location into id object??? check spread operator
+    // map over request.files (it's an array which contains the cloudinary stuff).
+    // so.. within req.files; assign cloudinary's path (f.path) & filename (f.filename) to url & filename within the (campground model) respectively.
+    const updatedImages = req.files.map(f => ({ url: f.path, filename: f.filename })); // implicit return requires parens around the braces...
+    updatedData.images.push(...updatedImages);
+    await updatedData.save();
     req.flash('flashMsgSuccess', 'Campground successfully updated!'); // make sure you display this info in the template (ejs)
     res.redirect(`/campgrounds/${updatedData._id}`);
 }

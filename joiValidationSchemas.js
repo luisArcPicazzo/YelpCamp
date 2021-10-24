@@ -6,6 +6,7 @@ joi.object({
         joi.object({
             title: joi.string().required(),
             // image: joi.string().required(),  // disabled due to cloudinary tests..
+
             price: joi.number().required().min(0.0),
             description: joi.string().required(),
             location: joi.string().required()
@@ -20,3 +21,13 @@ joi.object({
             body: joi.string().required()
         }).required() //  newCampgroundReview comes from show.ejs
 });
+
+
+
+
+// images: joi.array().items(
+//     joi.object({
+//           url: joi.string().required(),
+//           filename: joi.string().required()
+//     }).required()
+// ).required(),
