@@ -10,7 +10,8 @@ joi.object({
             price: joi.number().required().min(0.0),
             description: joi.string().required(),
             location: joi.string().required()
-        }).required() // newCampground comes from new.ejs 
+        }).required(), // newCampground comes from new.ejs
+        deleteImages: joi.array()
 });
 
 module.exports.joiReviewSchema = 
