@@ -9,13 +9,29 @@
 const mongoose = require('mongoose');
 const review = require('./review');
 
+const ImageSchema = new mongoose.Schema({
+    /** Created a separate imageSchema in order to make virtual 
+     * cloudinary thumbnails and not load the whole image. 
+     * needs to assign a special url per image in order to 
+     * affect the size... (cloudinary's transformation API)
+     * finally; this schema embeds into "CampgroundSchema"
+     */
+    url: String,     // stores cloudinary's path
+    filename: String // stores coudinary's filename
+});
+
+/** the virtual property makes it look as if this modified url 
+ * were stored in the database, but it is actually not. Though still 
+ * makes it work and look as if it were. This is useful.
+ */
+ImageSchema.virtual('thumbnail').get(function(){ // 'thumbnail' is how you've called the property. That is; the property to be called elsewhere (edit.ejs in this case)
+                                                 // what it does: on every image I wanna set up a thumbnail, with a callback function referring to a particuilar image.
+    return this.url.replace('/upload', '/upload/c_crop,h_200,w_300'); // modify the url in order to "trim" the image being requested / displayed.
+});
+
 const CampgroundSchema = new mongoose.Schema ({
     title: String, // shorthand of {type: String}
-    images: [
-        {   url: String,      // stores cloudinary's path
-            filename: String  // stores coudinary's filename
-        }
-    ],
+    images: [ImageSchema],
     price: Number,
     description: String,
     location: String,

@@ -43,7 +43,7 @@ of the current html, into the boilerplate's body so you can now program to only 
             </div>
             <div class="mb-3">
                 <%campGrndById.images.forEach(function(img, i) {%>
-                    <img src="<%=img.url%>" alt="" class="img-thumbnail">
+                    <img src="<%=img.thumbnail%>" alt="" class="img-thumbnail"> <!-- thumbnail is the property used in order to call the transformation image API in cloudinary. This renders a smaller image within the edit form. -->
                     <div class="form-check-inline">
                         <input type="checkbox" id="image-<%=i%>" name="deleteImages[]" value="<%=img.filename%>">
                     </div>
