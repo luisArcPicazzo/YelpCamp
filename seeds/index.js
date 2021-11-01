@@ -41,17 +41,26 @@ const seedDB = async() => {
             provident nisi inventore magnam ea, excepturi cupiditate. Provident, delectus iste!',
             price: randomPrice,
             images: [
+              //  {
+              //    url: 'https://res.cloudinary.com/e-pc/image/upload/v1635096294/YelpCamp/l0tf2dcnjgw4shjib4wj.jpg',
+              //    filename: 'YelpCamp/l0tf2dcnjgw4shjib4wj'
+              //  },
+              //  {
+              //    url: 'https://res.cloudinary.com/e-pc/image/upload/v1635096296/YelpCamp/j2gyevb1c9suu26xrc8k.jpg',
+              //    filename: 'YelpCamp/j2gyevb1c9suu26xrc8k'
+              //  },
+              //  {
+              //    url: 'https://res.cloudinary.com/e-pc/image/upload/v1635096297/YelpCamp/qjuqyfjoo86miz2k4hvt.jpg',
+              //    filename: 'YelpCamp/qjuqyfjoo86miz2k4hvt'
+              //  }
+
                 {
-                  url: 'https://res.cloudinary.com/e-pc/image/upload/v1635096294/YelpCamp/l0tf2dcnjgw4shjib4wj.jpg',
-                  filename: 'YelpCamp/l0tf2dcnjgw4shjib4wj'
+                  url: 'https://res.cloudinary.com/e-pc/image/upload/v1635749462/YelpCamp/rqrponndxnvwscpqhg36.jpg',
+                  filename: 'YelpCamp/rqrponndxnvwscpqhg36'
                 },
                 {
-                  url: 'https://res.cloudinary.com/e-pc/image/upload/v1635096296/YelpCamp/j2gyevb1c9suu26xrc8k.jpg',
-                  filename: 'YelpCamp/j2gyevb1c9suu26xrc8k'
-                },
-                {
-                  url: 'https://res.cloudinary.com/e-pc/image/upload/v1635096297/YelpCamp/qjuqyfjoo86miz2k4hvt.jpg',
-                  filename: 'YelpCamp/qjuqyfjoo86miz2k4hvt'
+                  url: 'https://res.cloudinary.com/e-pc/image/upload/v1635749463/YelpCamp/utuffzzxbvjwzv6qynrn.jpg',
+                  filename: 'YelpCamp/utuffzzxbvjwzv6qynrn' 
                 }
               ]
         });
