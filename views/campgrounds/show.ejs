@@ -5,8 +5,8 @@ of the current html, into the boilerplate's body so you can now program to only 
 <link rel="stylesheet" href="/stylesheets/starRatings.css">
 
 <div class="row">
-    <div class="col-6">
-      
+  <div class="col-6">
+      <div id='map' style='width: 400px; height: 300px;'></div>
       <div id="campgroundImageCarousel" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">
             <% campGrndById.images.forEach((img, i) => { %> 
@@ -93,3 +93,9 @@ of the current html, into the boilerplate's body so you can now program to only 
     <% } %>
     </div>
 </div>
+
+<script> 
+  const mapBoxTokenFromEjsShowTemplate='<%-process.env.MAPBOX_TOKEN%>';
+  const campgroundMapLocation = <%-JSON.stringify(campGrndById)%>; // pass the object to the showPageMap.js file in order to acces lat, long of the campground.
+</script>
+<script src="/javascripts/showPageMap.js"></script>

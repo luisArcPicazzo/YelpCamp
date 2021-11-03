@@ -19,18 +19,17 @@ module.exports.createCampground = async (req, res, next) => { // catchAsync --> 
         query: req.body.newCampground.location,
         limit: 1
     }).send();
-    res.send(geoData.body.features[0].geometry.coordinates);
-    //res.send('OK');
-    // const newlyCreatedCampground = new Campground(req.body.newCampground); // creates new model containing what was entered by the user in the http form.
-    // // map over request.files (it's an array which contains the cloudinary stuff).
-    // // so.. within req.files; assign cloudinary's path (f.path) & filename (f.filename) to url & filename within the (campground model) respectively.
-    
-    // newlyCreatedCampground.images = req.files.map(f => ({ url: f.path, filename: f.filename })); // implicit return requires parens around the braces...
-    // newlyCreatedCampground.author = req.user._id; // associate the logged in user as author to the newly created campground
-    // await newlyCreatedCampground.save();
-    
-    // req.flash('flashMsgSuccess', 'New campground created!'); // make sure you display this info in the template (ejs)
-    // res.redirect(`campgrounds/${newlyCreatedCampground._id}`); // redirects you to the new campground by passing the newCamp's id to the url
+    // res.send(geoData.body.features[0].geometry.coordinates);
+    const newlyCreatedCampground = new Campground(req.body.newCampground); // creates new model containing what was entered by the user in the http form.
+    // map over request.files (it's an array which contains the cloudinary stuff).
+    // so.. within req.files; assign cloudinary's path (f.path) & filename (f.filename) to url & filename within the (campground model) respectively.
+    newlyCreatedCampground.geometry = geoData.body.features[0].geometry;
+    newlyCreatedCampground.images = req.files.map(f => ({ url: f.path, filename: f.filename })); // implicit return requires parens around the braces...
+    newlyCreatedCampground.author = req.user._id; // associate the logged in user as author to the newly created campground
+    await newlyCreatedCampground.save();
+    console.log(newlyCreatedCampground);
+    req.flash('flashMsgSuccess', 'New campground created!'); // make sure you display this info in the template (ejs)
+    res.redirect(`campgrounds/${newlyCreatedCampground._id}`); // redirects you to the new campground by passing the newCamp's id to the url
 }
 
 module.exports.showCampground = async (req, res) => {
