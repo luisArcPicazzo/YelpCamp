@@ -16,6 +16,7 @@ of the current html, into the boilerplate's body so you can now program to only 
 </head>
 -->
 <body>
+    <div id="map" style="width: 100%; height: 500px" ></div>
     <h1>All CAMPGROUNDS</h1>
     <a href="/campgrounds/new">Add a New Campground!</a>
         <% for (let campGrnd of allCampgrounds) {%> 
@@ -44,4 +45,9 @@ of the current html, into the boilerplate's body so you can now program to only 
         <% } %> 
 </body>
 
-<!--</html>-->
+<script> 
+    const mapBoxTokenFromEjsIndexTemplate='<%-process.env.MAPBOX_TOKEN%>';
+    const allCampgroundsData = { features: <%- JSON.stringify(allCampgrounds)%> } 
+</script>
+<script src="/javascripts/clusterMap.js"></script>
+

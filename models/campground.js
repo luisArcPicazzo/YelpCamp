@@ -61,6 +61,12 @@ const CampgroundSchema = new mongoose.Schema ({
             ref: 'Review' // Defines a reference towards the review's schema.
         }
     ]
+}, { toJSON: { virtuals: true } } ); // toJSON virtuals true -> tells mongoose to add to the schema virtual properties of JSON.Strigified objects.. (used for mapbox cluster map in this case...)
+
+CampgroundSchema.virtual('properties.popUpMarkup').get(function () {
+    //return "I AM POPUP TEXT!!!";
+    return `<a href="/campgrounds/${this._id}">${this.title}</a>
+            <p>${this.description.substring(0,100)}...</p>`;
 });
 
 /**
