@@ -132,6 +132,10 @@ app.use('/', routesUsers);
 app.use('/campgrounds', routesCampgrounds); // prefixed with "/campgrounds"
 app.use('/campgrounds/:id/reviews', routesReviews);
 
+app.get('/', (req, res) => {
+    res.render('home');
+});
+
 app.all('*', (req, res, next)=> {
     next(new expressError('Page Not Found :(', 404));
     /**

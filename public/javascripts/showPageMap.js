@@ -8,6 +8,8 @@ mapboxgl.accessToken = mapBoxTokenFromEjsShowTemplate;
         zoom: 9 // starting zoom
     });
 
+map.addControl(new mapboxgl.NavigationControl());
+
 // Create a default Marker and add it to the map.
 new mapboxgl.Marker()
     .setLngLat(campgroundMapLocation.geometry.coordinates)
