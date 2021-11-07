@@ -25,6 +25,7 @@ const DBUrl = productionDbUrl || developmentDbUrl;
 const secretProduction = process.env.SECRET;
 const secretDevelopment = 'secret';
 const secretSessionConfig =  secretProduction || secretDevelopment;
+const port = process.env.PORT || 3000;
 // mongoose.connect(productionDbUrl, {
 //mongoose.connect(developmentDbUrl, {
 mongoose.connect(DBUrl, {
@@ -225,6 +226,6 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render('error', { err });
 });
 
-app.listen(3000, () => {
-    console.log('serving from port 3000');
+app.listen(port, () => {
+    console.log(`serving from port ${port}`);
 });
