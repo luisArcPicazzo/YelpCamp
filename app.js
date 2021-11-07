@@ -2,6 +2,7 @@
 if(process.env.NODE_ENV !== "production") {
     require('dotenv').config();
 }
+
 const express = require('express');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override'); // to send other than POST and GET http verbs
@@ -12,12 +13,21 @@ const app = express();
 const passport = require('passport');
 const passportLocalStrategy = require('passport-local'); // nothing to do with 'passport-local-mongoose', that belongs to the User model...
 const User = require('./models/user');
-
 const routesUsers = require('./routes/users');
 const routesCampgrounds = require('./routes/campgrounds');
 const routesReviews = require('./routes/reviews');
-
-mongoose.connect('mongodb://localhost:27017/yelp-camp', {
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const mongoDBStore = require('connect-mongo')(session);
+const productionDbUrl =  process.env.PRODUCTION_DB_URL;
+const developmentDbUrl = 'mongodb://localhost:27017/yelp-camp';
+const DBUrl = productionDbUrl || developmentDbUrl;
+const secretProduction = process.env.SECRET;
+const secretDevelopment = 'secret';
+const secretSessionConfig =  secretProduction || secretDevelopment;
+// mongoose.connect(productionDbUrl, {
+//mongoose.connect(developmentDbUrl, {
+mongoose.connect(DBUrl, {
     useNewUrlParser: true, useUnifiedTopology: true // does not support useCreateIndex: true anymore...
 })
     .then(()=> {
@@ -42,6 +52,7 @@ app.set('view engine', 'ejs'); // express behind the scenes requires ejs... so t
 */
 const path = require('path');
 const expressError = require('./utils/ExpressError');
+const { MongoStore } = require('connect-mongo');
 
 app.set('views', path.join(__dirname, 'views'));
 
@@ -51,13 +62,26 @@ app.use(express.static(path.join(__dirname, 'public'))); // serve our static ass
 /**
  * Sets up session (cookies and stuff)
  */
+const DBStore = new mongoDBStore({
+    url: DBUrl,
+    secret: 'secret',
+    touchAfter: 24 * 60 * 60 , // (converted to seconds hrs * mins * secs ) lazy updates session to avoid unnecessary session resave on database (don't continously update after a user refreshes a page every time. unless. touchAfter time has elapsed)
+});
+
+DBStore.on('error', function(e) {
+    console.log("SESSION STORE ERROR", e);
+});
+
 const sessionConfig = {
-    secret:           'secret',
-    resave:            false,
+    store: DBStore,
+    secret: secretSessionConfig,
+    resave: false,
     saveUninitialized: true,
     /** The above two options are to remove deprecation warnings */
     cookie: {
+        name: 'CUSTOMcookieSIDNAME', // good to customize name, in order to camouflage the coolkie's default id name.
         httpOnly: true, // protects cookie to not be accessed through client-side scripts, and as a result even w/cross side scripting, the browser will not reveal the cookie to the party.
+        //secure: true, // means cookie will work through https only! that is; breaks things if in localhost. (set to true on deploy)
         expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // ms * sec * mins * hrs * days (ms in a week so it expires in a week)
         maxAge: 1000 * 60 * 60 * 24 * 7
         /** 
@@ -71,6 +95,55 @@ app.use(session(sessionConfig)); // After setting up session we can now use "con
 app.use(flash()); // Should be able to flash something by calling request.flash(key, value)
 app.use(passport.initialize()); 
 app.use(passport.session()); // Use if you need persistent log-in sessions. Make sure you use session (as in app.use(session(sessionConfig));) before passport.session()...
+app.use(mongoSanitize());
+//app.use(helmet({ contentSecurityPolicy: false })); // careful, cause calling this (with no arguments) automatically enables all 11 of helmet's middleware. That is; could break things... Pass the correct argument in order to disable a specific middleware
+app.use(helmet()); // careful, cause calling this (with no arguments) automatically enables all 11 of helmet's middleware. That is; could break things... Pass the correct argument in order to disable a specific middleware
+
+const scriptSrcUrls = [
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://api.mapbox.com/",
+    "https://kit.fontawesome.com/",
+    "https://cdnjs.cloudflare.com/",
+    "https://cdn.jsdelivr.net",
+];
+const styleSrcUrls = [
+    "https://kit-free.fontawesome.com/",
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.mapbox.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://fonts.googleapis.com/",
+    "https://use.fontawesome.com/",
+    "https://cdn.jsdelivr.net",
+];
+const connectSrcUrls = [
+    "https://api.mapbox.com/",
+    "https://a.tiles.mapbox.com/",
+    "https://b.tiles.mapbox.com/",
+    "https://events.mapbox.com/",
+];
+const fontSrcUrls = [];
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: ["blob:"], // safari needs the blob there
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "'self'",
+                "blob:",
+                "data:",
+                "https://res.cloudinary.com/e-pc/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
+                "https://images.unsplash.com/",
+            ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
+
 passport.use(new passportLocalStrategy(User.authenticate())); // method within passportLocalMongoose.
 passport.serializeUser(User.serializeUser());      // how do we store a user in the session
 passport.deserializeUser(User.deserializeUser());  // how do we get the user out of the session un-store them 
@@ -109,7 +182,7 @@ app.engine('ejs', ejsMate);
 // TEMPORARY MIDDLEWARE SECTION:
     // Flash Middleware
 app.use((req, res, next) => {
-    console.log(req.session);
+//    console.log(req.query);
     res.locals.currentSignedInUser = req.user;
     res.locals.flashMsgSuccess = req.flash('flashMsgSuccess');
     res.locals.flashMsgError = req.flash('flashMsgError');
